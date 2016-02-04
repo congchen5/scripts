@@ -1,5 +1,6 @@
 import sys
 import csv
+from tabulate import tabulate
 
 # Additional Payment Values on top of the base month payment to try.
 ADDITIONAL_PAYMENT_VALUES = [0, 25, 50, 75, 100]
@@ -8,6 +9,10 @@ def CalcMonthInterest(month_payment, principal, interest_rate):
   interest_amt = interest_rate * principal / 12.0;
   return (principal - (month_payment - interest_amt), interest_amt);
 
+# Calculate the amount of interest being paid given the monthly payment,
+# starting principal, and interest rate.
+# Returns:
+#   (total amount of interest, number of months to pay off)
 def CalcInterestAmt(month_payment, starting_principal, interest_rate):
   month_count = 0;
   principal = starting_principal;
@@ -20,6 +25,7 @@ def CalcInterestAmt(month_payment, starting_principal, interest_rate):
 
   return (total_interest, month_count)
 
+# Get the (interest paid, month_count) for each payment amount, along with addiitonal payments
 def GetAllOptions(original_principal, interest_rate, base_month_payment):
   result = ()
   for p in ADDITIONAL_PAYMENT_VALUES:
@@ -39,27 +45,15 @@ def GetDataFromCSV(file_name):
 
   return list
 
-def PrintoutTable(dataLst):
-  print('{0:9s} {1:12s} {2:7s}').format('Principal', 'InterestRate', 'BasePay')
-  printRow = ''
-  # Format for provided data.
-  # 1st column: Principal: 9 char
-  # 2nd column: InterestRate: 12 char
-  # 3rd column: BasePay: 7 char
-  for row in dataLst:
-    printRow = ('{0:6.2f} {1:7.4f} {2:4.2f}').format(
-        row[0], row[1], row[2])
+# Given the row data from the csv, (principal_amount interest_rate base_month_payment)
+# and the calculated data, (interest paid, month_count) together, print out a table.
+def PrintoutTable(allData):
+  headers = ['Principal Amount', 'Interest Rate', 'Base Month Payment']
+  for val in ADDITIONAL_PAYMENT_VALUES:
+    headers.append(str(val) + ' Interest')
+    headers.append(str(val) + ' Months')
 
-  #providedRow = ('{0:6.2f} {1:7.4f} {2:4.2f}').format(
-  #    providedData[0], providedData[1], providedData[2])
-
-  #calcRow = ''
-  #for calcData in listCalcData:
-    # Format for calculated data.
-    # 1st column: Interest: 7 char
-    # 2nd column: 
-    #t = ('{0:3.2f} {0:1.5f} {0:4.2f}').format(
-    #  providedData[0], providedData[1], providedData[2])
+  print tabulate(allData, headers=headers)
 
 def main():
   all_data = GetDataFromCSV('data/loanInfo.csv')
@@ -67,9 +61,6 @@ def main():
   for data in all_data:
     lst.append(data + GetAllOptions(data[0], data[1], data[2]))
 
-  for item in lst:
-    print item
-
-  #PrintoutTable(lst)
+  PrintoutTable(lst)
 
 main()
