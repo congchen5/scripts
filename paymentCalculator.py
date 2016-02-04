@@ -39,10 +39,3 @@ def main():
   print('Number of biweekly payments in 2015: %d' % (calculatePayments(2, 14)))
 
 main()
-
-
-
-
-
-
-
