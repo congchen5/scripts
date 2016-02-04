@@ -3,8 +3,9 @@ import csv
 from tabulate import tabulate
 
 # Additional Payment Values on top of the base month payment to try.
-ADDITIONAL_PAYMENT_VALUES = [0, 25, 50, 75, 100]
+ADDITIONAL_PAYMENT_VALUES = [0, 50, 75, 100]
 
+# Calculate the amount of interest in a month.
 def CalcMonthInterest(month_payment, principal, interest_rate):
   interest_amt = interest_rate * principal / 12.0;
   return (principal - (month_payment - interest_amt), interest_amt);
@@ -45,21 +46,27 @@ def GetDataFromCSV(file_name):
 
   return list
 
+# Sum all the rows in data along the columns
+def GetSumAllRows(data):
+  return reduce(lambda x,y: map(lambda z: sum(z), zip(x,y)), data)
+
+
 # Given the row data from the csv, (principal_amount interest_rate base_month_payment)
 # and the calculated data, (interest paid, month_count) together, print out a table.
 def PrintoutTable(allData):
   headers = ['Principal Amount', 'Interest Rate', 'Base Month Payment']
   for val in ADDITIONAL_PAYMENT_VALUES:
-    headers.append(str(val) + ' Interest')
-    headers.append(str(val) + ' Months')
+    headers.append('+%d, Interest' % (val))
+    headers.append('+%d, Months' % (val))
 
-  print tabulate(allData, headers=headers)
+  print tabulate(allData, headers=headers, floatfmt='.2f')
 
 def main():
   all_data = GetDataFromCSV('data/loanInfo.csv')
   lst = []
   for data in all_data:
     lst.append(data + GetAllOptions(data[0], data[1], data[2]))
+  lst.append(GetSumAllRows(lst))
 
   PrintoutTable(lst)
 
